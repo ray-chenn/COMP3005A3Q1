@@ -1,0 +1,93 @@
+   import java.sql.Connection;
+   import java.sql.DriverManager;
+   import java.sql.SQLException;
+   import java.sql.Date;
+
+   public class PostgreSQLJDBCConnection {
+       public static void main(String[] args) {
+          //JDBC & Database credentials
+           String url = "jdbc:postgresql:  localhost:3000/students";
+           String user = "Ray Chen";
+           String password = "101224388";
+
+           PostgreSQLJDBCConnection postgreSQLJDBCConnection;
+           try {    //Load PostgreSQL JDBC Driver
+               Class.forName("org.postgresql.Driver");
+                  //Connect to the database
+               Connection conn = DriverManager.getConnection(url, user, password);
+               if (conn != null) {
+                   getAllStudents();
+                   addStudent();
+                   updateStudentEmail();
+                   deleteStudent();
+               } 
+               else {
+                   System.out.println("Failed to establish connection.");
+               }    //Close the connection (in a real scenario, do this in a finally
+               conn.close();
+           }
+           catch (ClassNotFoundException | SQLException e) {
+               e.printStackTrace();
+           }
+       }
+
+       // obtain list of all students
+       public static void getAllStudents() {
+           try {
+               Statement statement = connection.createStatement();
+               ResultSet resultSet = statement.executeQuery("SELECT * FROM students");
+               // obtain data
+               while (resultSet.next()) {
+                   System.out.println(resultSet.getInt("student_id") + ", "
+                           + resultSet.getString("first_name") + " "
+                           + resultSet.getString("last_name") + ", "
+                           + resultSet.getString("email") + ", "
+                           + resultSet.getDate("enrollment_date"));
+               }
+               resultSet.close();
+               statement.close();
+           } catch (SQLException e) {
+               e.printStackTrace();
+           }
+       }
+
+       // add student to database
+       public void addStudent(String firstName, String lastName, String email, Date enrollmentDate) {
+           try {
+               PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO students (first_name, last_name, email, enrollment_date) VALUES (?, ?, ?, ?)");
+               preparedStatement.setString(1, firstName);
+               preparedStatement.setString(2, lastName);
+               preparedStatement.setString(3, email);
+               preparedStatement.setDate(4, enrollmentDate);
+               preparedStatement.executeUpdate();
+               preparedStatement.close();
+           } catch (SQLException e) {
+               e.printStackTrace();
+           }
+       }
+
+       // update student emails
+       public void updateStudentEmail(int studentId, String newEmail) {
+           try {
+               PreparedStatement preparedStatement = connection.prepareStatement("UPDATE students SET email = ? WHERE student_id = ?");
+               preparedStatement.setString(1, newEmail);
+               preparedStatement.setInt(2, studentId);
+               preparedStatement.executeUpdate();
+               preparedStatement.close();
+           } catch (SQLException e) {
+               e.printStackTrace();
+           }
+       }
+
+       // remove student from database
+       public void deleteStudent(int studentId) {
+           try {
+               PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM students WHERE student_id = ?");
+               preparedStatement.setInt(1, studentId);
+               preparedStatement.executeUpdate();
+               preparedStatement.close();
+           } catch (SQLException e) {
+               e.printStackTrace();
+           }
+       }
+   }
